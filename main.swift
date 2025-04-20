@@ -29,7 +29,7 @@ if !context.canEvaluatePolicy(policy, error: &contextError) {
 let arguments = Array(CommandLine.arguments.dropFirst())
 if arguments.count == 1, arguments.first == "--version" || arguments.first == "-v" {
 	// package.json.version
-	print("1.0.4")
+	print("1.0.5")
 	exit(EXIT_SUCCESS)
 }
 
@@ -38,23 +38,23 @@ if arguments.isEmpty || (arguments.count == 1 && arguments.first == "-h" || argu
 		"""
 		Usage:
 		    get    <namespace> <key>
-		    set    <namespace> <key> <value> [strict]
-		    delete <namespace> <key> [strict]
+		    set    <namespace> <key> <value> [--strict]
+		    delete <namespace> <key> [--strict]
 
 		Arguments:
 		    <namespace> A unique value used to prevent storage conflicts.
 		    <key>       The key to operate on.
 		    <value>     The value to store (only for 'set').
-		    strict      Optional boolean flag (true/false). Defaults to false.
+		    --strict    Optional boolean flag (true/false). Defaults to false.
 		                 - For 'set': If the key already exists, the command will fail.
 		                 - For 'delete': If the key does not exist, the command will fail.
 
 		Examples:
 		    set    namespace key value
-		    set    namespace key value true
+		    set    namespace key value --strict
 		    get    namespace key
 		    delete namespace key
-		    delete namespace key true
+		    delete namespace key --strict
 		"""
 	)
 	exit(EXIT_SUCCESS)
@@ -259,22 +259,24 @@ func parse(args: [String]) -> Input? {
 	let fifth = args[safe: 4] ?? ""
 	guard !verb.isEmpty, !namespace.isEmpty, !key.isEmpty else { return nil }
 	if verb == "set" {
-		guard !fourth.isEmpty, fifth.isEmpty || get(bool: fifth) != nil else { return nil }
-		return .set(namespace: namespace, key: key, value: fourth, strict: fifth == "true")
+		let strict = get(bool: fifth)
+		guard !fourth.isEmpty, fifth.isEmpty || strict != nil else { return nil }
+		return .set(namespace: namespace, key: key, value: fourth, strict: strict ?? false)
 	} else if verb == "get" {
 		guard fourth.isEmpty, fifth.isEmpty else { return nil }
 		return .get(namespace: namespace, key: key)
 	} else if verb == "delete" {
-		guard fourth.isEmpty || get(bool: fourth) != nil, fifth.isEmpty else { return nil }
-		return .delete(namespace: namespace, key: key, strict: fourth == "true")
+		let strict = get(bool: fourth)
+		guard fourth.isEmpty || strict != nil, fifth.isEmpty else { return nil }
+		return .delete(namespace: namespace, key: key, strict: strict ?? false)
 	}
 	return nil
 }
 
 func get(bool text: String) -> Bool? {
 	switch text.lowercased() {
-	case "true", "yes", "1": true
-	case "false", "no", "0": false
+	case "--strict": true
+	case "": false
 	default: nil
 	}
 }
