@@ -27,13 +27,19 @@ if !context.canEvaluatePolicy(policy, error: &contextError) {
 // Validate Script Input
 
 let arguments = Array(CommandLine.arguments.dropFirst())
+if arguments.count == 1, arguments.first == "--version" || arguments.first == "-v" {
+	// package.json.version
+	print("1.0.1")
+	exit(EXIT_SUCCESS)
+}
+
 guard let input = parse(args: arguments) else {
 	if arguments.isEmpty || (arguments.count == 1 && arguments.first == "-h" || arguments.first == "--help") {
 		print(
 			"""
 			Usage:
-			    get <namespace> <key>
-			    set <namespace> <key> <value> [strict]
+			    get    <namespace> <key>
+			    set    <namespace> <key> <value> [strict]
 			    delete <namespace> <key> [strict]
 
 			Arguments:
@@ -45,9 +51,9 @@ guard let input = parse(args: arguments) else {
 			                 - For 'delete': If the key does not exist, the command will fail.
 
 			Examples:
-			    set namespace key value
-			    set namespace key value true
-			    get namespace key
+			    set    namespace key value
+			    set    namespace key value true
+			    get    namespace key
 			    delete namespace key
 			    delete namespace key true
 			"""
