@@ -1,16 +1,16 @@
 #!/usr/bin/env bun
 import { $ } from 'bun';
-import packageJson from '../package.json';
+import packageJson from './package.json';
 
-class Script {
+class prepublishOnly {
 	private constructor() {}
 	static async run() {
 		// remember : steps must run in order
 		const steps = [
-			this.updateUsageText('README.md', '```'),
-			this.updateUsageText('src/main.swift', '"""'),
+			this.updateUsageText('usage.txt', 'README.md', '```'),
+			this.updateUsageText('usage.txt', 'main.swift', '"""'),
 			this.checkPackageVersion,
-			this.updateSwiftPackageVersion,
+			() => this.updateSwiftPackageVersion('main.swift'),
 			this.checkCleanGit,
 		] satisfies (() => Promise<String | void>)[];
 
@@ -51,8 +51,7 @@ class Script {
 			return `❌ Invalid package.json version: ${packageJson.version}`;
 	}
 
-	static async updateSwiftPackageVersion() {
-		const swiftPath = 'src/main.swift';
+	static async updateSwiftPackageVersion(swiftPath: string) {
 		const identifier = '// package.json.version';
 		const swiftFile = Bun.file(swiftPath);
 		const swiftText = await swiftFile.text();
@@ -71,11 +70,10 @@ class Script {
 		await Bun.write(swiftPath, newSwiftText);
 	}
 
-	static updateUsageText(path: string, identifier: string) {
-		const usagePath = 'src/usage.txt';
+	static updateUsageText(from: string, to: string, identifier: string) {
 		return async () => {
 			try {
-				const updateFile = Bun.file(path);
+				const updateFile = Bun.file(to);
 				const updateText = await updateFile.text();
 
 				const firstIndex =
@@ -96,7 +94,7 @@ class Script {
 				const updateTextBefore = updateText.slice(0, firstIndex);
 				const updateTextAfter = updateText.slice(secondIndex);
 
-				const usageFile = Bun.file(usagePath);
+				const usageFile = Bun.file(from);
 				const usageText = await usageFile.text();
 				const safeUsageText = usageText
 					.split('\n')
@@ -118,13 +116,27 @@ class Script {
 					'\n' +
 					indentation +
 					updateTextAfter;
-				await Bun.write(path, newUpdateText);
+				await Bun.write(to, newUpdateText);
 			} catch (error) {
 				console.error(error);
-				return `❌ Failed to update ${path}`;
+				return `❌ Failed to update ${to}`;
 			}
 		};
 	}
 }
 
-await Script.run();
+// run the relevant script
+const args = process.argv.slice(2);
+switch (args.join(' ')) {
+	case '--prepublishOnly':
+		await prepublishOnly.run();
+		break;
+
+	default:
+		console.error(
+			`Unknown command. Check the script at "${
+				process.argv.at(1) ?? 'scripts.ts'
+			}".`,
+		);
+		process.exit(1);
+}

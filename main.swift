@@ -29,7 +29,7 @@ if !context.canEvaluatePolicy(policy, error: &contextError) {
 let arguments = Array(CommandLine.arguments.dropFirst())
 if arguments.count == 1, arguments.first == "--version" || arguments.first == "-v" {
 	// package.json.version
-	print("1.0.3")
+	print("1.0.4")
 	exit(EXIT_SUCCESS)
 }
 

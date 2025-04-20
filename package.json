@@ -1,6 +1,6 @@
 {
 	"name": "biometric-keychain",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Access macOS Keychain with Touch ID.",
 	"keywords": [
 		"biometric",
@@ -20,13 +20,13 @@
 	},
 	"funding": "https://github.com/sponsors/navtoj",
 	"files": [
-		"src/main.swift"
+		"main.swift"
 	],
-	"bin": "src/main.swift",
+	"bin": "main.swift",
 	"repository": "github:navtoj/biometric-keychain",
 	"scripts": {
-		"biometric-keychain": "src/main.swift",
-		"prepublishOnly": "scripts/prepublishOnly.ts"
+		"biometric-keychain": "main.swift",
+		"prepublishOnly": "./scripts.ts --prepublishOnly"
 	},
 	"os": [
 		"darwin"
