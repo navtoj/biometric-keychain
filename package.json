@@ -1,12 +1,13 @@
 {
 	"name": "biometric-keychain",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Access macOS Keychain with Touch ID.",
 	"keywords": [
 		"biometric",
 		"keychain",
 		"macos"
 	],
+	"homepage": "https://github.com/navtoj/biometric-keychain",
 	"bugs": {
 		"url": "https://github.com/navtoj/biometric-keychain/issues",
 		"email": "biometric-keychain.npm@navtoj.com"
