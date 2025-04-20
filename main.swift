@@ -2,6 +2,16 @@
 import Foundation
 import LocalAuthentication
 
+// Setup Logging
+
+public struct StderrOutputStream: TextOutputStream {
+	public mutating func write(_ string: String) { fputs(string, stderr) }
+}
+
+// debugPrint("message", to: &err) // "message"
+// print	("message", to: &err) //  message
+public var err = StderrOutputStream()
+
 // Setup Helpers
 
 // let log = Log(name: nil)
@@ -20,7 +30,7 @@ context.touchIDAuthenticationAllowableReuseDuration = LATouchIDAuthenticationMax
 
 var contextError: NSError?
 if !context.canEvaluatePolicy(policy, error: &contextError) {
-	print(contextError?.debugDescription ?? "This system doesn't support biometric authentication.")
+	print(contextError?.debugDescription ?? "This system doesn't support biometric authentication.", to: &err)
 	exit(EXIT_FAILURE)
 }
 
@@ -29,7 +39,7 @@ if !context.canEvaluatePolicy(policy, error: &contextError) {
 let arguments = Array(CommandLine.arguments.dropFirst())
 if arguments.count == 1, arguments.first == "--version" || arguments.first == "-v" {
 	// package.json.version
-	print("1.0.5")
+	print("1.0.6")
 	exit(EXIT_SUCCESS)
 }
 
@@ -61,7 +71,7 @@ if arguments.isEmpty || (arguments.count == 1 && arguments.first == "-h" || argu
 }
 
 guard let input = parse(args: arguments) else {
-	print("Invalid arguments. Use -h or --help for usage information.")
+	print("Invalid arguments. Use -h or --help for usage information.", to: &err)
 	exit(EXIT_FAILURE)
 }
 
@@ -95,7 +105,7 @@ if case let .success(value) = result {
 	exit(EXIT_SUCCESS)
 } else if case let .failure(error) = result {
 	// log.write(error.description)
-	print(error.localizedDescription)
+	print(error.localizedDescription, to: &err)
 	exit(EXIT_FAILURE)
 }
 
@@ -192,14 +202,14 @@ struct Log {
 		let fileManager = FileManager.default
 		if !fileManager.fileExists(atPath: logURL.path) {
 			guard fileManager.createFile(atPath: logURL.path, contents: nil, attributes: nil) else {
-				print("Error: Unable to create log file.")
+				print("Error: Unable to create log file.", to: &err)
 				exit(EXIT_FAILURE)
 			}
 		}
 
 		// Create File Handle
 		guard let handle = FileHandle(forWritingAtPath: logURL.path) else {
-			print("Error: Unable to create file handle.")
+			print("Error: Unable to create file handle.", to: &err)
 			exit(EXIT_FAILURE)
 		}
 		file = handle
@@ -209,13 +219,13 @@ struct Log {
 		do {
 			try file.truncate(atOffset: 0)
 		} catch {
-			print("Log Error: \(error.localizedDescription)")
+			print("Log Error: \(error.localizedDescription)", to: &err)
 		}
 	}
 
 	func write(_ message: String) {
 		guard let data = message.data(using: .utf8) else {
-			print("Log Error: Invalid data.")
+			print("Log Error: Invalid data.", to: &err)
 			return
 		}
 
@@ -224,7 +234,7 @@ struct Log {
 			try file.write(contentsOf: data)
 			try file.close()
 		} catch {
-			print("Log Error: \(error.localizedDescription)")
+			print("Log Error: \(error.localizedDescription)", to: &err)
 		}
 	}
 }
@@ -237,9 +247,9 @@ func auth<T>(context: LAContext, policy: LAPolicy, reason: String, run: @escapin
 		guard !success else {
 			return run()
 		}
-		print("Authentication Failed:", "Unknown reason.")
+		await MainActor.run { print("Authentication Failed:", "Unknown reason.", to: &err) }
 	} catch {
-		print(error.localizedDescription)
+		await MainActor.run { print(error.localizedDescription, to: &err) }
 	}
 	exit(EXIT_FAILURE)
 }
@@ -297,7 +307,7 @@ enum KeychainError: Error, LocalizedError, CustomStringConvertible {
 	case setConvertValueToData
 	case getMoreThanOneItem
 
-	// print(error.localizedDescription)
+	// print(error.localizedDescription, to: &err)
 	var errorDescription: String? {
 		switch self {
 		case let .unhandled(status):
@@ -317,7 +327,7 @@ enum KeychainError: Error, LocalizedError, CustomStringConvertible {
 		}
 	}
 
-	// print(error)
+	// print(error, to: &err)
 	var description: String {
 		switch self {
 		case let .unhandled(status):
