@@ -33,33 +33,34 @@ if arguments.count == 1, arguments.first == "--version" || arguments.first == "-
 	exit(EXIT_SUCCESS)
 }
 
+if arguments.isEmpty || (arguments.count == 1 && arguments.first == "-h" || arguments.first == "--help") {
+	print(
+		"""
+		Usage:
+		    get    <namespace> <key>
+		    set    <namespace> <key> <value> [strict]
+		    delete <namespace> <key> [strict]
+
+		Arguments:
+		    <namespace> A unique value used to prevent storage conflicts.
+		    <key>       The key to operate on.
+		    <value>     The value to store (only for 'set').
+		    strict      Optional boolean flag (true/false). Defaults to false.
+		                 - For 'set': If the key already exists, the command will fail.
+		                 - For 'delete': If the key does not exist, the command will fail.
+
+		Examples:
+		    set    namespace key value
+		    set    namespace key value true
+		    get    namespace key
+		    delete namespace key
+		    delete namespace key true
+		"""
+	)
+	exit(EXIT_SUCCESS)
+}
+
 guard let input = parse(args: arguments) else {
-	if arguments.isEmpty || (arguments.count == 1 && arguments.first == "-h" || arguments.first == "--help") {
-		print(
-			"""
-			Usage:
-			    get    <namespace> <key>
-			    set    <namespace> <key> <value> [strict]
-			    delete <namespace> <key> [strict]
-
-			Arguments:
-			    <namespace> A unique value used to prevent storage conflicts.
-			    <key>       The key to operate on.
-			    <value>     The value to store (only for 'set').
-			    strict      Optional boolean flag (true/false). Defaults to false.
-			                 - For 'set': If the key already exists, the command will fail.
-			                 - For 'delete': If the key does not exist, the command will fail.
-
-			Examples:
-			    set    namespace key value
-			    set    namespace key value true
-			    get    namespace key
-			    delete namespace key
-			    delete namespace key true
-			"""
-		)
-		exit(EXIT_SUCCESS)
-	}
 	print("Invalid arguments. Use -h or --help for usage information.")
 	exit(EXIT_FAILURE)
 }

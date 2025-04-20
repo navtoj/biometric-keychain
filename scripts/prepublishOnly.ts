@@ -24,8 +24,10 @@ class Script {
 	}
 
 	static async checkCleanGit() {
-		const output = await $`git status --porcelain`.text();
-		if (output) return '❌ Uncommitted changes detected.';
+		const uncommitted = await $`git status --porcelain`.text();
+		if (uncommitted) return '❌ Uncommitted changes detected.';
+		const unpushed = await $`git log origin/main..HEAD`.text();
+		if (unpushed) return '❌ Unpushed changes detected.';
 	}
 
 	static async checkPackageVersion() {
