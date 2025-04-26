@@ -1,37 +1,50 @@
 {
 	"name": "biometric-keychain",
-	"version": "1.0.6",
-	"description": "Access macOS Keychain with Touch ID.",
-	"keywords": [
-		"biometric",
-		"keychain",
-		"macos"
-	],
-	"homepage": "https://github.com/navtoj/biometric-keychain",
-	"bugs": {
-		"url": "https://github.com/navtoj/biometric-keychain/issues",
-		"email": "biometric-keychain.npm@navtoj.com"
-	},
-	"license": "MIT",
+	"version": "1.0.7",
 	"author": {
 		"name": "navtoj",
 		"email": "npm@navtoj.com",
 		"url": "https://github.com/navtoj"
 	},
-	"funding": "https://github.com/sponsors/navtoj",
-	"files": [
-		"main.swift"
-	],
-	"bin": "main.swift",
 	"repository": "github:navtoj/biometric-keychain",
-	"scripts": {
-		"biometric-keychain": "main.swift",
-		"prepublishOnly": "./scripts.ts --prepublishOnly"
+	"main": "./dist/index.js",
+	"devDependencies": {
+		"@types/bun": "^1.2.10",
+		"typescript": "^5.8.3"
+	},
+	"bin": "./src/main.swift",
+	"bugs": {
+		"url": "https://github.com/navtoj/biometric-keychain/issues",
+		"email": "biometric-keychain.npm@navtoj.com"
+	},
+	"description": "Access macOS Keychain with Touch ID.",
+	"files": [
+		"src/main.swift",
+		"dist"
+	],
+	"funding": "https://github.com/sponsors/navtoj",
+	"homepage": "https://github.com/navtoj/biometric-keychain",
+	"keywords": [
+		"biometric",
+		"keychain",
+		"macos"
+	],
+	"license": "MIT",
+	"engines": {
+		"node": ">=22.0.0"
 	},
 	"os": [
 		"darwin"
 	],
-	"devDependencies": {
-		"@types/bun": "^1.2.10"
+	"scripts": {
+		"biometric-keychain": "src/main.swift",
+		"prepublishOnly": "./scripts.ts --prepublishOnly",
+		"build": "tsc",
+		"build:watch": "bun run build --watch"
+	},
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"dependencies": {
+		"execa": "^9.5.2"
 	}
 }

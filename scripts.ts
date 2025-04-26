@@ -1,17 +1,19 @@
 #!/usr/bin/env bun
-import { $ } from 'bun';
+import { $, stderr } from 'bun';
 import packageJson from './package.json';
 
-class prepublishOnly {
+class PrePublishOnly {
 	private constructor() {}
 	static async run() {
-		// remember : steps must run in order
+		// steps must run in order?
 		const steps = [
-			this.updateUsageText('usage.txt', 'README.md', '```'),
-			this.updateUsageText('usage.txt', 'main.swift', '"""'),
-			this.checkPackageVersion,
-			() => this.updateSwiftPackageVersion('main.swift'),
-			this.checkCleanGit,
+			this.#buildTypescript,
+			this.#updateUsageText('src/usage.txt', 'README.md', '```'),
+			this.#updateUsageText('src/usage.txt', 'src/main.swift', '"""'),
+			this.#checkPackageVersion,
+			() => this.#updateSwiftPackageVersion('src/main.swift'),
+			this.#checkCleanGit,
+			this.#runTests,
 		] satisfies (() => Promise<String | void>)[];
 
 		for await (const step of steps) {
@@ -23,14 +25,29 @@ class prepublishOnly {
 		}
 	}
 
-	static async checkCleanGit() {
+	static async #runTests() {
+		const output = await $`bun test --bail`.nothrow();
+		if (!output.stderr.toString().includes('0 fail'))
+			return '\n❌ Some test(s) failed.';
+	}
+
+	static async #checkCleanGit() {
 		const uncommitted = await $`git status --porcelain`.text();
 		if (uncommitted) return '❌ Uncommitted changes detected.';
 		const unpushed = await $`git log origin/main..HEAD`.text();
 		if (unpushed) return '❌ Unpushed changes detected.';
 	}
 
-	static async checkPackageVersion() {
+	static async #buildTypescript() {
+		try {
+			await $`bun run build`.text();
+		} catch (error) {
+			console.error(error);
+			return '❌ Failed to build TypeScript.';
+		}
+	}
+
+	static async #checkPackageVersion() {
 		const remoteVersion =
 			await $`npm view ${packageJson.name} version`.text();
 
@@ -51,7 +68,7 @@ class prepublishOnly {
 			return `❌ Invalid package.json version: ${packageJson.version}`;
 	}
 
-	static async updateSwiftPackageVersion(swiftPath: string) {
+	static async #updateSwiftPackageVersion(swiftPath: string) {
 		const identifier = '// package.json.version';
 		const swiftFile = Bun.file(swiftPath);
 		const swiftText = await swiftFile.text();
@@ -64,13 +81,13 @@ class prepublishOnly {
 		const versionLine = swiftLines.at(versionLineIndex + 1);
 		if (!versionLine) return '❌ Failed to find version line.';
 		if (versionLine.includes(packageJson.version)) return;
-		const newVersionLine = `${indentation}print("${packageJson.version}")`;
+		const newVersionLine = `${indentation}SUCCESS(result: "${packageJson.version}")`;
 		swiftLines[versionLineIndex + 1] = newVersionLine;
 		const newSwiftText = swiftLines.join('\n');
 		await Bun.write(swiftPath, newSwiftText);
 	}
 
-	static updateUsageText(from: string, to: string, identifier: string) {
+	static #updateUsageText(from: string, to: string, identifier: string) {
 		return async () => {
 			try {
 				const updateFile = Bun.file(to);
@@ -129,7 +146,7 @@ class prepublishOnly {
 const args = process.argv.slice(2);
 switch (args.join(' ')) {
 	case '--prepublishOnly':
-		await prepublishOnly.run();
+		await PrePublishOnly.run();
 		break;
 
 	default:
