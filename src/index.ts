@@ -24,10 +24,13 @@ const verboseErrorRegex =
 
 export class BiometricKeychain {
 	#namespace: string = 'biometric-keychain';
-	#path: string;
+	#path: string = 'node_modules/.bin/biometric-keychain';
 
-	constructor({ path, namespace }: { path: string; namespace?: string }) {
-		this.#path = path;
+	constructor({ path, namespace }: { path?: string; namespace?: string }) {
+		if (path !== undefined) {
+			if (path.trim().length === 0) throw new Error('Invalid path.');
+			this.#path = path;
+		}
 		if (namespace !== undefined) {
 			if (namespace.trim().length === 0)
 				throw new Error('Invalid namespace.');

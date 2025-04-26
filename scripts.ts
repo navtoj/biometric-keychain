@@ -81,7 +81,7 @@ class PrePublishOnly {
 		const versionLine = swiftLines.at(versionLineIndex + 1);
 		if (!versionLine) return '❌ Failed to find version line.';
 		if (versionLine.includes(packageJson.version)) return;
-		const newVersionLine = `${indentation}SUCCESS(result: "${packageJson.version}")`;
+		const newVersionLine = `${indentation}EXIT(stdout: "${packageJson.version}")`;
 		swiftLines[versionLineIndex + 1] = newVersionLine;
 		const newSwiftText = swiftLines.join('\n');
 		await Bun.write(swiftPath, newSwiftText);

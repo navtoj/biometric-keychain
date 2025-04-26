@@ -18,7 +18,7 @@ signal(SIGTERM, signalHandler)
 let arguments = Array(CommandLine.arguments.dropFirst())
 if arguments.first == "--version" {
 	// package.json.version
-	EXIT(stdout: "1.0.7")
+	EXIT(stdout: "1.0.8")
 }
 
 if arguments.isEmpty || arguments.first == "--help" {
