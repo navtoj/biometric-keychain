@@ -2,9 +2,17 @@
 import Foundation
 import LocalAuthentication
 
+// Configure Authentication
+
+let context = LAContext()
+context.touchIDAuthenticationAllowableReuseDuration = LATouchIDAuthenticationMaximumAllowableReuseDuration
+context.localizedFallbackTitle = ""
+let policy = LAPolicy.deviceOwnerAuthentication // WithBiometrics
+
 // Handle Signals
 
 let signalHandler: @convention(c) (Int32) -> Void = { _ in
+	context.invalidate()
 	EXIT(stderr: "")
 }
 
@@ -47,18 +55,17 @@ if arguments.isEmpty || arguments.first == "--help" {
 	)
 }
 
+if arguments.first == "--LAContext-Invalidate" {
+	// Script Use Only
+	context.invalidate()
+	exit(EXIT_SUCCESS)
+}
+
 // Validate Script Input
 
 guard let input = parse(args: arguments) else {
 	EXIT(stderr: "Invalid arguments. Use -h or --help for usage information.")
 }
-
-// Configure Authentication
-
-let policy = LAPolicy.deviceOwnerAuthenticationWithBiometrics
-let context = LAContext()
-context.localizedFallbackTitle = ""
-context.touchIDAuthenticationAllowableReuseDuration = LATouchIDAuthenticationMaximumAllowableReuseDuration
 
 // Check Biometric Support
 
