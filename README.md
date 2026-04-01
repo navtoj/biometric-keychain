@@ -1,5 +1,9 @@
 # Biometric Keychain
 
+![Screenshot of Script in Terminal](https://github.com/user-attachments/assets/858aca53-8bb3-4421-adaf-867ae4aff9ae)
+
+<!-- ![Screenshot of Script in Terminal](https://github.com/user-attachments/assets/21ef6575-de5e-4434-80c9-3f670ca7ae7b) -->
+
 ```
 Usage:
     get    <namespace> <key>
@@ -22,11 +26,7 @@ Examples:
     delete namespace key --strict
 ```
 
-<!-- Alternatively, use `swift test.swift` instead. -->
-
-![Screenshot of Script in Terminal](https://github.com/user-attachments/assets/858aca53-8bb3-4421-adaf-867ae4aff9ae)
-
-<!-- ![Screenshot of Script in Terminal](https://github.com/user-attachments/assets/21ef6575-de5e-4434-80c9-3f670ca7ae7b) -->
-
 > [!TIP]
 > Run `chmod +x main.swift` to fix `zsh: permission denied: ./main.swift` error.
+
+<!-- Alternatively, use `swift main.swift` instead. -->
